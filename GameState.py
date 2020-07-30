@@ -176,14 +176,15 @@ class GameState():
                 dfs(grid, i, j-1, h, w)
 
         num = 0    
-        if self.game_state:
-            h = len(self.game_state)
-            w = len(self.game_state[0])
+        current_game_state = copy.deepcopy(self.game_state)
+        if current_game_state:
+            h = len(current_game_state)
+            w = len(current_game_state[0])
             for i in range(h):
                 for j in range(w):
-                    if self.game_state[i][j] == 0:
+                    if current_game_state[i][j] == 0:
                         num += 1                    
-                        dfs(self.game_state, i, j, h, w)
+                        dfs(current_game_state, i, j, h, w)
         return score + - (num * 0.2)
 
     def check_height(self, score):
