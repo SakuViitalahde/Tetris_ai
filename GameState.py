@@ -185,13 +185,14 @@ class GameState():
                     if current_game_state[i][j] == 0:
                         num += 1                    
                         dfs(current_game_state, i, j, h, w)
-        return score + - (num * 0.2)
+        return score + - (num * 0.03)
 
     def check_height(self, score):
         over_height = 0
         for x in self.game_state[0:14]:
             if len(set(x)) > 1:
                 over_height += 1
+                continue
         
-        score = score - (0.1 * over_height)
+        score = score - (0.01 * over_height)
 

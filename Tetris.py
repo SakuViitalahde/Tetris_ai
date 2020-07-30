@@ -30,8 +30,8 @@ def main(genomes, config):
     current_blocks = []
     next_blocks = []
     running = True
-    clock = pygame.time.Clock()
-    clock.tick(3600)  
+    #clock = pygame.time.Clock()
+    #clock.tick(3600)  
 
     for index, g in genomes:
         net = neat.nn.FeedForwardNetwork.create(g, config)
@@ -43,7 +43,7 @@ def main(genomes, config):
         next_blocks.append(blocks.get_random_block())
 
     while running:
-        win = pygame.display.set_mode((WIN_WIDTH,WIN_HEIGHT))
+        #win = pygame.display.set_mode((WIN_WIDTH,WIN_HEIGHT))
         for i, game_state in enumerate(games):
             running = True
 
@@ -76,8 +76,8 @@ def main(genomes, config):
             if output[3] ==  max_value and not current_blocks[i].dropped:
                 current_blocks[i].rotate_block(game_state)
 
-            if i == 0:
-                game_state.draw_window(win, current_blocks[i], ge[i].fitness, next_blocks[i])
+            #if i == 0:
+                #game_state.draw_window(win, current_blocks[i], ge[i].fitness, next_blocks[i])
 
             # Move Block
             if not current_blocks[i].move_down(game_state):
