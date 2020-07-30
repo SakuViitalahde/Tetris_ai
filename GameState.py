@@ -159,18 +159,32 @@ class GameState():
         self.game_state = new_game_state
         return score
 
+
     def check_holes(self, score):
-        seen = set()
-        M = len(self.game_state)
-        N = len(self.game_state[0]) if M else 0
-        def go(i, j):
-            if i < 0 or i == M or j < 0 or j == N or self.game_state[i][j] == '0' or f'{i},{j}' in seen:
-                return 0
-            seen.add(f'{i},{j}')
-            for [u, v] in [[i - 1, j], [i, j + 1], [i + 1, j], [i, j - 1]]:
-                go(u, v)
-            return score
-        return score + - (sum(go(i, j) for i in range(M) for j in range(N)) * 0.3)
+        """
+        Check holes in matrix and remove some fitness if found
+        """
+        def dfs(grid, i, j, h, w):   
+            grid[i][j] = 1
+            if i + 1 < h and grid[i+1][j] == 0:
+                dfs(grid, i+1, j, h, w)
+            if i - 1 >= 0 and grid[i-1][j] == 0: 
+                dfs(grid, i-1, j, h, w)
+            if j + 1 < w and grid[i][j+1] == 0:
+                dfs(grid, i, j+1, h, w)
+            if j - 1 >= 0 and grid[i][j-1] == 0:    
+                dfs(grid, i, j-1, h, w)
+
+        num = 0    
+        if self.game_state:
+            h = len(self.game_state)
+            w = len(self.game_state[0])
+            for i in range(h):
+                for j in range(w):
+                    if self.game_state[i][j] == 0:
+                        num += 1                    
+                        dfs(self.game_state, i, j, h, w)
+        return score + - (num * 0.2)
 
     def check_height(self, score):
         over_height = 0
@@ -178,5 +192,5 @@ class GameState():
             if len(set(x)) > 1:
                 over_height += 1
         
-        score = score - (0.4 * over_height)
+        score = score - (0.1 * over_height)
 
