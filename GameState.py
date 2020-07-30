@@ -185,7 +185,10 @@ class GameState():
                     if current_game_state[i][j] == 0:
                         num += 1                    
                         dfs(current_game_state, i, j, h, w)
-        return score + - (num * 0.03)
+        if num == 0:
+            return score + 1
+        else:
+            return score - (num * 0.5)
 
     def check_height(self, score):
         over_height = 0
@@ -194,5 +197,23 @@ class GameState():
                 over_height += 1
                 continue
         
-        score = score - (0.01 * over_height)
+        return score - (0.2 * over_height)
 
+    def check_pikes(self, score):
+        current_game_state = copy.deepcopy(self.game_state)
+        current_game_state = self.rotate_matrix(current_game_state)
+        min_value = 20
+        max_value = 0
+        for x in current_game_state:
+            filtered_list = list(filter(lambda a: a != 0, x))
+            filtered_len = len(filtered_list)
+            if filtered_len > 0:
+                if filtered_len > max_value:
+                    max_value = filtered_len
+                if filtered_len < min_value:
+                    min_value = filtered_len
+        difference = max_value - min_value
+        return score - (difference * 0.3)
+
+    def rotate_matrix(self,m):
+        return list(list(x)[::-1] for x in zip(*m))
