@@ -4,7 +4,7 @@ import copy
 class Block():
     def __init__(self, block_matrix, shape):
         super().__init__()
-        self.block_position = (1,2) 
+        self.block_position = (1,3) 
         self.block_matrix = block_matrix # This is 2x2,3x3 or 4x4 depending from blocktype
         self.shape = shape # Shape of block
         self.timer = 1
@@ -64,6 +64,14 @@ class Block():
             if len(set(row)) > 1 or self.set_unpacking(set(row)) > 0:
                 height += 1
         return height
+    
+    def calculate_width(self):
+        width = 0
+        block_matrix = self.rotate_matrix(self.block_matrix)
+        for row in block_matrix:
+            if len(set(row)) > 1 or self.set_unpacking(set(row)) > 0:
+                width += 1
+        return width
 
     def set_unpacking(self, s):
         e, *_ = s

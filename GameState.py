@@ -8,6 +8,10 @@ pygame.font.init()
 class GameState():
     def __init__(self):
         self.game_state =  [[0] * 10 for i in range(22)]
+        self.tetris = 0
+        self.difference = 0 
+        self.field_used = 0
+        self.holes = 0 
 
     def draw_window(self, win, current_block, score, next_block):
 
@@ -144,7 +148,7 @@ class GameState():
         else:
             return False
     
-    def check_tetris(self, score):
+    def check_tetris(self):
         """
         Check and remove rows with tetris.
         Also add 10p per tetris
@@ -155,12 +159,10 @@ class GameState():
                 new_game_state.append(row)
             else:
                 new_game_state.insert(0, [0] * 10)
-                score += 1
+                self.tetris += 1
         self.game_state = new_game_state
-        return score
 
-
-    def check_holes(self, score):
+    def check_holes(self):
         """
         Check holes in matrix and remove some fitness if found
         """
@@ -186,23 +188,23 @@ class GameState():
                         num += 1                    
                         dfs(current_game_state, i, j, h, w)
         if num == 0:
-            return score + 1
+            self.holes = 0
         else:
-            return score - (num * 0.5)
+            self.holes = num
 
-    def check_height(self, score):
-        over_height = 0
-        for x in self.game_state[0:14]:
-            if len(set(x)) > 1:
-                over_height += 1
-                continue
-        
-        return score - (0.2 * over_height)
-
-    def check_pikes(self, score):
+    def check_height(self):
         current_game_state = copy.deepcopy(self.game_state)
         current_game_state = self.rotate_matrix(current_game_state)
-        min_value = 20
+        field_used = 0
+        for x in current_game_state:
+            filtered_list = list(filter(lambda a: a != 0, x))
+            filtered_len = len(filtered_list)
+            field_used += filtered_len
+        self.field_used = field_used
+
+    def check_pikes(self):
+        current_game_state = copy.deepcopy(self.game_state)
+        current_game_state = self.rotate_matrix(current_game_state)
         max_value = 0
         for x in current_game_state:
             filtered_list = list(filter(lambda a: a != 0, x))
@@ -210,10 +212,7 @@ class GameState():
             if filtered_len > 0:
                 if filtered_len > max_value:
                     max_value = filtered_len
-                if filtered_len < min_value:
-                    min_value = filtered_len
-        difference = max_value - min_value
-        return score - (difference * 0.3)
+        self.difference = max_value
 
     def rotate_matrix(self,m):
         return list(list(x)[::-1] for x in zip(*m))

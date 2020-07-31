@@ -54,27 +54,91 @@ def main(genomes, config):
             input_values = []
             for v in game_state.game_state[14:]:
                 input_values += v
-            
-            for v in current_blocks[i].block_matrix:
-                input_values += v
 
-            for v in next_blocks[i].block_matrix:
-                input_values += v
-            
-            for v in current_blocks[i].block_position:
-                input_values.append(v)
+            if not current_blocks[i].dropped:
+                for v in current_blocks[i].block_matrix:
+                    input_values += v
 
-            output = nets[i].activate(input_values)
-            max_value = max(output)
+                for v in next_blocks[i].block_matrix:
+                    input_values += v
+                
+                for v in current_blocks[i].block_position:
+                    input_values.append(v)
 
-            if output[0] ==  max_value and not current_blocks[i].dropped:
-                current_blocks[i].move_left(game_state)
-            if output[1] ==  max_value and not current_blocks[i].dropped:
-                current_blocks[i].move_right(game_state)
-            if output[2] ==  max_value and not current_blocks[i].dropped:
+                output = nets[i].activate(input_values)
+                max_value_rotate = max(output[0:4])
+
+                if output[0] ==  max_value_rotate:
+                    current_blocks[i].rotate_block(game_state)
+                    current_blocks[i].rotate_block(game_state)
+                    current_blocks[i].rotate_block(game_state)
+                    current_blocks[i].rotate_block(game_state)
+                elif output[1] ==  max_value_rotate:
+                    current_blocks[i].rotate_block(game_state)
+                    current_blocks[i].rotate_block(game_state)
+                    current_blocks[i].rotate_block(game_state)
+                elif output[2] ==  max_value_rotate:
+                    current_blocks[i].rotate_block(game_state)
+                    current_blocks[i].rotate_block(game_state)
+                elif output[3] ==  max_value_rotate:
+                    current_blocks[i].rotate_block(game_state)
+
+                current_blocks[i].calculate_width()
+                
+                left_index = 9 - current_blocks[i].calculate_width()
+
+                max_left_move = max(output[4:left_index])
+                
+                right_index = 15 - current_blocks[i].calculate_width()
+
+                max_right_move = max(output[10:right_index])
+
+                max_value_move = max([max_right_move,left_index,output[4]])
+
+                if output[9] ==  max_value_move:
+                    current_blocks[i].move_left(game_state)
+                    current_blocks[i].move_left(game_state)
+                    current_blocks[i].move_left(game_state)
+                    current_blocks[i].move_left(game_state)
+                    current_blocks[i].move_left(game_state)
+                elif output[8] ==  max_value_move:
+                    current_blocks[i].move_left(game_state)
+                    current_blocks[i].move_left(game_state)
+                    current_blocks[i].move_left(game_state)
+                    current_blocks[i].move_left(game_state)
+                elif output[7] ==  max_value_move:
+                    current_blocks[i].move_left(game_state)
+                    current_blocks[i].move_left(game_state)
+                    current_blocks[i].move_left(game_state)
+                elif output[6] ==  max_value_move:
+                    current_blocks[i].move_left(game_state)
+                    current_blocks[i].move_left(game_state)
+                elif output[5] ==  max_value_move:
+                    current_blocks[i].move_left(game_state)
+                elif output[4] ==  max_value_move:
+                    pass
+                elif output[14] ==  max_value_move:
+                    current_blocks[i].move_right(game_state)
+                    current_blocks[i].move_right(game_state)
+                    current_blocks[i].move_right(game_state)
+                    current_blocks[i].move_right(game_state)
+                    current_blocks[i].move_right(game_state)
+                elif output[13] ==  max_value_move:
+                    current_blocks[i].move_right(game_state)
+                    current_blocks[i].move_right(game_state)
+                    current_blocks[i].move_right(game_state)
+                    current_blocks[i].move_right(game_state)
+                elif output[12] ==  max_value_move:
+                    current_blocks[i].move_right(game_state)
+                    current_blocks[i].move_right(game_state)
+                    current_blocks[i].move_right(game_state)
+                elif output[11] ==  max_value_move:
+                    current_blocks[i].move_right(game_state)
+                    current_blocks[i].move_right(game_state)
+                elif output[10] ==  max_value_move:
+                    current_blocks[i].move_right(game_state)
+
                 current_blocks[i].dropped = True
-            if output[3] ==  max_value and not current_blocks[i].dropped:
-                current_blocks[i].rotate_block(game_state)
 
             if i == 0:
                 game_state.draw_window(win, current_blocks[i], ge[i].fitness, next_blocks[i])
@@ -84,12 +148,16 @@ def main(genomes, config):
                 game_state.game_state = game_state.set_current_block_to_gamestate(current_blocks[i])
                 current_blocks[i] = next_blocks[i]
                 next_blocks[i] = None
-                ge[i].fitness += 1
-                ge[i].fitness = game_state.check_holes(ge[i].fitness)
-                ge[i].fitness = game_state.check_height(ge[i].fitness)
-                ge[i].fitness = game_state.check_pikes(ge[i].fitness)
+                game_state.check_tetris()
+                game_state.check_holes()
+                game_state.check_height()
+                game_state.check_pikes()
 
-            ge[i].fitness = game_state.check_tetris(ge[i].fitness)
+                a = -0.510066
+                b = 0.760666
+                c = -0.35663
+                d = -0.184483
+                ge[i].fitness = (a * game_state.field_used) + (b * game_state.tetris) + (c * game_state.holes) + (c * game_state.difference)
 
             if game_state.check_fail():
                 ge[i].fitness -= 1
@@ -111,7 +179,10 @@ def run(config_path):
     p.add_reporter(stats)
 
     winner = p.run(main,500)
-    print(winner)
+    print("Winner Winner!")
+    with open("genomes.txt", "w") as file1: 
+        # Writing data to a file 
+        file1.write(str(winner)) 
 
 if __name__ == "__main__":
     local_dir = os.path.dirname(__file__)
